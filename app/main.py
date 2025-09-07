@@ -19,12 +19,12 @@ CORS(app)  # Permet les requêtes cross-origin
 load_dotenv()
 
 # -------------------- Configuration du logging --------------------
-os.makedirs("logs", exist_ok=True)
+os.makedirs("../logs", exist_ok=True)
 
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s %(levelname)s %(message)s',
-    handlers=[logging.FileHandler("logs/server.log"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("../logs/server.log"), logging.StreamHandler()],
     encoding = "UTF-8"
 )
 
@@ -52,6 +52,7 @@ def home():
     
     return jsonify({
         "message": "Bienvenue sur l'API Navion",
+        "toto": env
         "status": "running",
         "version": "1.0.0",
         "endpoints": {

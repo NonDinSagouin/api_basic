@@ -1,6 +1,8 @@
 services:
   flask-api:
-    build: ../app
+    build:
+      context: ..
+      dockerfile: docker/api/Dockerfile
     container_name: navion-flask-api
     expose:
       - "5000"
