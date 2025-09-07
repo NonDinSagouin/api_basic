@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from dotenv import load_dotenv
 
 from config.RateLimit import RateLimit
 
@@ -15,6 +16,7 @@ ERROR = "Error !"
 
 app = Flask(__name__)
 CORS(app)  # Permet les requêtes cross-origin
+load_dotenv()
 
 # -------------------- Configuration du logging --------------------
 os.makedirs("logs", exist_ok=True)
@@ -30,15 +32,6 @@ logger = logging.getLogger(__name__)
 app.logger.info('Server launch!')
 
 # -------------------- Configuration du rate limiting --------------------
-RATE_LIMITS = {
-    "strict": "5 per minute",
-    "moderate": "20 per minute",
-    "relaxed": "50 per minute",
-    "auth": "10 per minute",
-    "public": "30 per minute"
-}
-
-# Configuration avec stockage en mémoire mais avec un identifiant unique pour éviter les conflits
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=[RateLimit.STRICT],
