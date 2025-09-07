@@ -3,9 +3,10 @@ import logging
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+
+from config.RateLimit import RateLimit
 
 from blueprints.health import health_bp
 from blueprints.users import users_bp
@@ -15,7 +16,7 @@ ERROR = "Error !"
 app = Flask(__name__)
 CORS(app)  # Permet les requêtes cross-origin
 
-#region -------------------- Configuration du logging --------------------
+# -------------------- Configuration du logging --------------------
 os.makedirs("logs", exist_ok=True)
 
 logging.basicConfig(
@@ -27,34 +28,32 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 app.logger.info('Server launch!')
-#endregion
 
-#region -------------------- Configuration du rate limiting --------------------
+# -------------------- Configuration du rate limiting --------------------
 RATE_LIMITS = {
     "strict": "5 per minute",
-    "moderate": "20 per minute", 
+    "moderate": "20 per minute",
     "relaxed": "50 per minute",
     "auth": "10 per minute",
     "public": "30 per minute"
 }
 
+# Configuration avec stockage en mémoire mais avec un identifiant unique pour éviter les conflits
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=[],  # Pas de limites par défaut 
+    default_limits=[RateLimit.STRICT],
     storage_uri="memory://",
     headers_enabled=True,
 )
 limiter.init_app(app)
-#endregion
 
-#region -------------------- Enregistrement des blueprints --------------------
+# -------------------- Enregistrement des blueprints --------------------
 app.register_blueprint(health_bp)
 app.register_blueprint(users_bp)
-#endregion
 
 # Route de base
 @app.route('/')
-@limiter.limit("2 per minute")  # Limite très stricte pour test
+@limiter.limit(RateLimit.STRICT)  # Limite très stricte pour test
 def home():
     logger.info(f"Request from {get_remote_address()} to /")
     

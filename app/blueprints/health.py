@@ -7,10 +7,7 @@ health_bp = Blueprint('health', __name__, url_prefix='/health')
 @health_bp.route('/check', methods=['GET'])
 def health_check():
     """Endpoint de vérification de santé de l'API avec rate limiting"""
-    # Accès au limiter depuis l'app
-    from utils.limiter import RATE_LIMITS
     
-    # Application du rate limiting via décorateur (sera ajouté après)
     return jsonify({
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
