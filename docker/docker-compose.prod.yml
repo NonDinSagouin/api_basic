@@ -1,0 +1,32 @@
+services:
+  flask-api:
+    build: ../app
+    container_name: navion-flask-api
+    expose:
+      - "5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=main.py
+    volumes:
+      - ../app:/app
+    restart: unless-stopped
+    command: gunicorn --bind 0.0.0.0:5000 --workers 4 main:app
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: navion-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx-simple.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - flask-api
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
