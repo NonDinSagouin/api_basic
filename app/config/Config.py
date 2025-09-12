@@ -5,10 +5,13 @@ Ce fichier contient toutes les constantes et paramètres configurables de l'appl
 
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
     """Configuration de base pour l'application"""
-    
+
     # Informations de l'application
     APP_NAME = "default_name"
     APP_DESCRIPTION = "Une API REST développée avec Flask"
@@ -35,7 +38,7 @@ class Config:
     # Configuration des logs
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'DEBUG')
     LOG_DIR = os.getenv('LOG_DIR', '../logs')
-    LOG_FILE = f"{LOG_DIR}/navion-api.log"
+    LOG_FILE = f"{LOG_DIR}/{APP_NAME}.log"
     
     # Configuration Rate Limiting
     RATE_LIMIT_STORAGE = os.getenv('RATE_LIMIT_STORAGE', 'memory://')
@@ -44,15 +47,6 @@ class Config:
     # Métadonnées
     CREATION_DATE = "2025-09-12"
     LAST_UPDATE = datetime.now().strftime("%Y-%m-%d")
-    
-    # Configuration de sécurité
-    SECURITY_HEADERS = {
-        'Content-Security-Policy': "default-src 'self'",
-        'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'deny',
-        'X-XSS-Protection': '1; mode=block',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
-    }
     
     # Messages d'erreur standard
     ERROR_MESSAGES = {
@@ -80,39 +74,3 @@ class Config:
             'creation_date': cls.CREATION_DATE,
             'last_update': cls.LAST_UPDATE
         }
-
-class DevelopmentConfig(Config):
-    """Configuration pour le développement"""
-    DEBUG = True
-    TESTING = False
-    LOG_LEVEL = 'DEBUG'
-
-class ProductionConfig(Config):
-    """Configuration pour la production"""
-    DEBUG = False
-    TESTING = False
-    LOG_LEVEL = 'INFO'
-    
-    # Override pour la production
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    if not SECRET_KEY:
-        raise ValueError("SECRET_KEY doit être défini en production")
-
-class TestingConfig(Config):
-    """Configuration pour les tests"""
-    TESTING = True
-    DEBUG = False
-    LOG_LEVEL = 'WARNING'
-
-# Mapping des configurations par environnement
-config = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'testing': TestingConfig,
-    'default': DevelopmentConfig
-}
-
-def get_config():
-    """Retourne la configuration basée sur l'environnement"""
-    env = os.getenv('FLASK_ENV', 'development')
-    return config.get(env, config['default'])
