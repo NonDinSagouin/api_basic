@@ -1,4 +1,4 @@
-# Blueprints pour l'API Navion
+# Blueprints pour api_basic 
 
 from .health import health_bp
 from .users import users_bp

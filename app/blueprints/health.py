@@ -11,9 +11,8 @@ def health_check():
     return jsonify({
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "service": "Navion API",
+        "service": "api_basic",
         "version": "1.0.0",
-        "rate_limit_info": "50 requests per minute for health checks"
     })
 
 @health_bp.route('/', methods=['GET'])

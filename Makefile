@@ -1,4 +1,4 @@
-# Makefile pour le projet Navion API
+# Makefile pour le projet api_basic
 
 .PHONY: help build start stop restart logs clean ssl dev prod test
 
@@ -29,10 +29,10 @@ logs: ## Affiche les logs
 	cd docker && docker-compose -f docker-compose.prod.yml logs -f
 
 logs-api: ## Affiche les logs de l'API uniquement
-	docker logs navion-flask-api -f
+	docker logs api_basic-flask-api -f
 
 logs-nginx: ## Affiche les logs de Nginx uniquement
-	docker logs navion-nginx -f
+	docker logs api_basic-nginx -f
 
 status: ## Affiche le statut des conteneurs
 	cd docker && docker-compose -f docker-compose.prod.yml ps
@@ -52,9 +52,6 @@ test: ## Teste l'API
 	@echo "Test de l'API..."
 	@curl -s http://localhost/health | grep -q "healthy" && echo "✅ API is healthy" || echo "❌ API is not responding"
 	@curl -s http://localhost/api/users | grep -q "Alice" && echo "✅ Users endpoint working" || echo "❌ Users endpoint error"
-
-install: ## Installe les dépendances de développement
-	cd app && pip install -r requirements.txt
 
 format: ## Formate le code Python
 	cd app && black main.py

@@ -44,27 +44,6 @@ limiter.init_app(app)
 app.register_blueprint(health_bp)
 app.register_blueprint(users_bp)
 
-# Route de base
-@app.route('/')
-@limiter.limit(RateLimit.STRICT)  # Limite très stricte pour test
-def home():
-    logger.info(f"Request from {get_remote_address()} to /")
-    
-    return jsonify({
-        "message": "Bienvenue sur l'API Navion",
-        "toto": env
-        "status": "running",
-        "version": "1.0.0",
-        "endpoints": {
-            "health": "/health/",
-            "health_check": "/health/check",
-            "users": "/users/get",
-        },
-        "rate_limiting": {
-            "enabled": True,
-        }
-    })
-
 @app.after_request
 def set_secure_headers(response):
     response.headers['Content-Security-Policy'] = "default-src 'self'"

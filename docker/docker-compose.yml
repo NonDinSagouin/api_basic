@@ -3,7 +3,7 @@ services:
     build:
       context: ..
       dockerfile: docker/api/Dockerfile
-    container_name: navion-flask-api
+    container_name: api_basic-flask-api
     expose:
       - "5000"
     environment:
@@ -18,7 +18,7 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: navion-nginx
+    container_name: api_basic-nginx
     ports:
       - "80:80"
     volumes:
