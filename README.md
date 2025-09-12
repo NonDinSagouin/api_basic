@@ -52,7 +52,8 @@ make clean         # Nettoie tout
 
 ### Endpoints disponibles
 - `GET /` - Page d'accueil de l'API
-- `GET /health` - Vérification de l'état de santé de l'API
+- `GET /health/check` - Vérification détaillée avec informations de l'application
+- `GET /health/info` - Informations complètes de l'application (nom, version, etc.)
 - `GET /api/users` - Récupération de la liste des utilisateurs
 - `POST /api/users` - Création d'un nouvel utilisateur
 - `PUT /api/users/<id>` - Mise à jour d'un utilisateur
@@ -62,7 +63,7 @@ make clean         # Nettoie tout
 
 ### Structure de l'API
 L'API est organisée en blueprints pour une meilleure modularité :
-- **health** : Endpoints de monitoring et santé
+- **health** : Endpoints de monitoring, santé et informations de l'application
 - **users** : Gestion des utilisateurs
 - **auth** : Authentification et autorisation (à venir)
 
@@ -121,15 +122,6 @@ make build && make start
 
 # Ou avec Docker Compose directement
 docker-compose -f docker/docker-compose.yml up --build
-```
-
-### Variables d'environnement
-Créez un fichier `.env` dans le dossier `app/` avec les variables suivantes :
-```env
-FLASK_ENV=development
-FLASK_DEBUG=True
-API_HOST=0.0.0.0
-API_PORT=5000
 ```
 
 ---

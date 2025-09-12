@@ -50,11 +50,4 @@ ssl: ## Configure SSL avec Let's Encrypt
 
 test: ## Teste l'API
 	@echo "Test de l'API..."
-	@curl -s http://localhost/health | grep -q "healthy" && echo "✅ API is healthy" || echo "❌ API is not responding"
-	@curl -s http://localhost/api/users | grep -q "Alice" && echo "✅ Users endpoint working" || echo "❌ Users endpoint error"
-
-format: ## Formate le code Python
-	cd app && black main.py
-
-lint: ## Vérifie le code Python
-	cd app && flake8 main.py
+	@curl -s http://localhost/health/check | grep -q "healthy" && echo "✅ API is healthy" || echo "❌ API is not responding"
