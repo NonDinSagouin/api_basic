@@ -46,7 +46,7 @@ class Config:
     
     # Métadonnées
     CREATION_DATE = "2025-09-12"
-    LAST_UPDATE = datetime.now().strftime("%Y-%m-%d")
+    LAST_UPDATE = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     # Messages d'erreur standard
     ERROR_MESSAGES = {

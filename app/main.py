@@ -6,11 +6,9 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+import blueprints as blueprints
+
 from config.RateLimit import RateLimit
-
-from blueprints.health import health_bp
-from blueprints.users import users_bp
-
 from config.Config import Config
 
 ERROR = "Error !"
@@ -37,15 +35,15 @@ app.logger.info('Server launch!')
 # -------------------- Configuration du rate limiting --------------------
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=[RateLimit.STRICT],
-    storage_uri="memory://",
+    default_limits=[Config.DEFAULT_RATE_LIMIT],
+    storage_uri=Config.RATE_LIMIT_STORAGE,
     headers_enabled=True,
 )
 limiter.init_app(app)
 
 # -------------------- Enregistrement des blueprints --------------------
-app.register_blueprint(health_bp)
-app.register_blueprint(users_bp)
+app.register_blueprint(blueprints.health_bp)
+app.register_blueprint(blueprints.test_bp)
 
 @app.route("/", methods=["GET"])
 def index():
