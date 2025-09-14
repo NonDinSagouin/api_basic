@@ -26,7 +26,8 @@ API_PREFIX = '/api/v1'
 # Authentification
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'dev-jwt-secret-key-change-in-production')
-JWT_ACCESS_TOKEN_EXPIRES = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 50))  # en minutes
+JWT_ACCESS_TOKEN_EXPIRES = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 60))  # en minutes
+TOKEN_RATE_LIMIT_PER_MINUTE = int(os.getenv('TOKEN_RATE_LIMIT_PER_MINUTE', 100))  # Limite par token par minute
 
 # Configuration Flask
 DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
@@ -47,6 +48,11 @@ LOG_FILE = f"{LOG_DIR}/{APP_NAME}.log"
 # Configuration Rate Limiting
 RATE_LIMIT_STORAGE = os.getenv('RATE_LIMIT_STORAGE', 'memory://')
 DEFAULT_RATE_LIMIT = os.getenv('DEFAULT_RATE_LIMIT', '100 per hour')
+
+# Configuration Redis
+REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
+REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+REDIS_URL = os.getenv('REDIS_URL', f'redis://{REDIS_HOST}:{REDIS_PORT}')
 
 # Métadonnées
 CREATION_DATE = "2025-09-12"

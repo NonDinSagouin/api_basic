@@ -1,12 +1,16 @@
 # 🚀 API Basic
 
+[![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
+
 [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)](https://flask.palletsprojects.com/)
-[![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
-[![Nginx](https://img.shields.io/badge/Nginx-Proxy-brightgreen.svg)](https://nginx.org/)
 [![Gunicorn](https://img.shields.io/badge/Gunicorn-21.2.0-yellow.svg)](https://gunicorn.org/)
+[![Redis](https://img.shields.io/badge/Redis-6.4.0-DC382D?logoColor=white)](https://redis.io/)
+[![Nginx](https://img.shields.io/badge/Nginx-Proxy-brightgreen.svg)](https://nginx.org/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
+
 
 Une API REST développée avec Flask et déployée avec Docker.
 
@@ -15,12 +19,15 @@ Une API REST développée avec Flask et déployée avec Docker.
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
-![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
-![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 ![Make](https://img.shields.io/badge/GNU%20Make-427819.svg?style=for-the-badge&logo=gnu&logoColor=white)
+
+![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white)
+![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 
 - **Backend** : Python 3.11, Flask 2.3.3
 - **Middleware** : Flask-CORS 4.0.0, Flask-Limiter 3.5.0
+- **Cache/Database** : Redis 7
 - **Serveur WSGI** : Gunicorn 21.2.0
 - **Proxy inverse** : Nginx
 - **Containerisation** : Docker + Docker Compose
@@ -50,8 +57,14 @@ docker-compose -f docker/docker-compose.yml up --build
 
 ### Tests de l'API
 ```bash
-# Tester tous les endpoints
+# Tester la santé de l'API
 make test-health
+
+# Tester Redis
+make test-redis
+
+# Tester tous les conteneurs
+make test-containers
 
 # Tester manuellement
 curl http://localhost/health/check
@@ -117,11 +130,19 @@ make logs-nginx    # Affiche les logs de Nginx uniquement
 make status        # Affiche le statut des conteneurs
 ```
 
-### 🧹 Maintenance
+### � Tests
+```bash
+make tests            # Exécute tous les tests 
+make test-health      # Teste la santé de l'API
+make test-redis       # Teste la connexion et les opérations Redis
+make test-containers  # Teste le statut de tous les conteneurs
+```
+
+### �🧹 Maintenance
 ```bash
 make clean         # Nettoie les conteneurs et images
+make clean-redis   # Nettoie les données Redis
 make ssl DOMAIN=exemple.com  # Configure SSL avec Let's Encrypt
-make test-health   # Teste la santé de l'API
 ```
 
 ## 🌐 Accès à l'API

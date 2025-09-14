@@ -9,12 +9,16 @@ services:
     environment:
       - FLASK_ENV=production
       - FLASK_APP=main.py
+      - REDIS_URL=redis://redis:6379
     volumes:
       - ../app:/app
+      - redis_data:/redis-data
     restart: unless-stopped
     command: gunicorn --bind 0.0.0.0:5000 --workers 1 main:app
     networks:
       - app-network
+    depends_on:
+      - redis
 
   nginx:
     image: nginx:alpine
@@ -28,6 +32,21 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: api_basic-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - app-network
+    command: redis-server --appendonly yes
+
+volumes:
+  redis_data:
 
 networks:
   app-network:

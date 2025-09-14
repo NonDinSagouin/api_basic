@@ -7,7 +7,7 @@ DOCKER_COMPOSE = docker-compose
 COMPOSE_DEV = docker-compose.yml
 COMPOSE_PROD = docker-compose.prod.yml
 
-.PHONY: help build start stop restart logs clean ssl dev prod test
+.PHONY: help build start stop restart logs clean ssl dev prod test test-redis test-containers
 
 check-docker: ## Vérifie si Docker et Docker Compose sont installés
 	@which docker > /dev/null || (echo "❌ Docker n'est pas installé" && exit 1)
@@ -58,6 +58,10 @@ status: ## Affiche le statut des conteneurs
 clean: ## Nettoie les conteneurs et images
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) down -v --rmi all
 
+clean-redis: ## Nettoie les données Redis
+	@echo "-- 🧹 Nettoyage des données Redis..."
+	@cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) exec redis redis-cli FLUSHALL > /dev/null 2>&1 && echo "✅ Redis data cleared" || echo "❌ Failed to clear Redis data"
+
 ssl: ## Configure SSL avec Let's Encrypt
 	@echo "Usage: make ssl DOMAIN=votre-domaine.com"
 	@if [ -z "$(DOMAIN)" ]; then \
@@ -66,6 +70,27 @@ ssl: ## Configure SSL avec Let's Encrypt
 	fi
 	./scripts/setup-ssl.sh $(DOMAIN)
 
+tests: test-containers test-health test-redis ## Exécute tous les tests
+
+test-containers: ## Vérifie que les conteneurs sont en cours d'exécution
+	@echo "-- 🔍 Vérification des conteneurs..."
+	@if [ -z "$$(cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) ps -q)" ]; then \
+		echo "❌ Aucun conteneur en cours d'exécution. Veuillez démarrer les conteneurs avec 'make up'."; \
+		exit 1; \
+	else \
+		echo "✅ Conteneurs en cours d'exécution:"; \
+		cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) ps; \
+	fi
+
 test-health: ## Teste la santé de l'API
-	@echo "🔍 Test de santé de l'API..."
+	@echo "-- 🔍 Test de santé de l'API..."
 	@curl -f -s http://localhost/health/check > /dev/null && echo "✅ API is healthy" || (echo "❌ API is not responding" && exit 1)
+
+test-redis: ## Teste la connexion à Redis
+	@echo "-- 🔍 Test de connexion à Redis..."
+	@cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) exec redis redis-cli ping > /dev/null 2>&1 && echo "✅ Redis is responding" || (echo "❌ Redis is not responding" && exit 1)
+	@echo "🔍 Test d'écriture/lecture Redis..."
+	@cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) exec redis redis-cli set test_key "test_value" > /dev/null 2>&1
+	@cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) exec redis redis-cli get test_key | grep -q "test_value" && echo "✅ Redis write/read test passed" || (echo "❌ Redis write/read test failed" && exit 1)
+	@cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) exec redis redis-cli del test_key > /dev/null 2>&1
+	@echo "✅ All Redis tests passed"
