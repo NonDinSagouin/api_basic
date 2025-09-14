@@ -42,6 +42,7 @@ down: ## Arrête les conteneurs de production
 restart: ## Redémarre les conteneurs de production
 	$(MAKE) down
 	$(MAKE) up
+	$(MAKE) tests
 
 logs: ## Affiche les logs
 	cd $(DOCKER_DIR) && $(DOCKER_COMPOSE) -f $(COMPOSE_PROD) logs -f

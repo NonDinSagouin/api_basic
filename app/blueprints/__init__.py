@@ -1,5 +1,5 @@
 # Blueprints pour api_basic 
 
-from .test import test_bp
+from .basic_endpoint import create_basic_endpoint
 
-__all__ = ['test_bp']
+__all__ = ['create_basic_endpoint']
