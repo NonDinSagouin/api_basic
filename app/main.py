@@ -1,31 +1,27 @@
 import os
 import logging
 
+from datetime import timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask_jwt_extended import JWTManager, create_access_token
 
-import blueprints as blueprints
-
-from config.RateLimit import RateLimit
-from config.Config import Config
+from core import limiter, health_bp, auth_bp
+from config import params
+from blueprints import *
 
 ERROR = "Error !"
 
 app = Flask(__name__)
 CORS(app)  # Permet les requêtes cross-origin
 
-# Configuration de l'application
-app.config.from_object(Config)
-
 # -------------------- Configuration du logging --------------------
-os.makedirs(Config.LOG_DIR, exist_ok=True)
+os.makedirs(params.LOG_DIR, exist_ok=True)
 
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s %(levelname)s %(message)s',
-    handlers=[logging.FileHandler(Config.LOG_FILE), logging.StreamHandler()],
+    handlers=[logging.FileHandler(params.LOG_FILE), logging.StreamHandler()],
     encoding = "UTF-8"
 )
 
@@ -33,21 +29,20 @@ logger = logging.getLogger(__name__)
 app.logger.info('Server launch!')
 
 # -------------------- Configuration du rate limiting --------------------
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=[Config.DEFAULT_RATE_LIMIT],
-    storage_uri=Config.RATE_LIMIT_STORAGE,
-    headers_enabled=True,
-)
 limiter.init_app(app)
 
-# -------------------- Enregistrement des blueprints --------------------
-app.register_blueprint(blueprints.health_bp)
-app.register_blueprint(blueprints.test_bp)
+# -------------------- Configuration de l'authentification JWT --------------------
+app.config['SECRET_KEY'] = params.JWT_SECRET_KEY
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=params.JWT_ACCESS_TOKEN_EXPIRES)
 
-@app.route("/", methods=["GET"])
-def index():
-    return jsonify({"msg": Config.HOST}), 200
+jwt = JWTManager(app)
+
+# -------------------- Enregistrement des blueprints --------------------
+# core
+app.register_blueprint(health_bp)
+app.register_blueprint(auth_bp)
+# blueprints
+app.register_blueprint(test_bp)
 
 @app.after_request
 def set_secure_headers(response):
@@ -57,35 +52,34 @@ def set_secure_headers(response):
     response.headers['X-XSS-Protection'] = '1; mode=block'
     return response
 
-@app.errorhandler(400)
+@app.errorhandler(400) # Bad Request
 def bad_request_error(error):
-    return jsonify({"msg": Config.ERROR_MESSAGES['400']}), 400
+    return jsonify({"msg": params.ERROR_MESSAGES['400']}), 400
 
-@app.errorhandler(401)
+@app.errorhandler(401) # Unauthorized
 def unauthorized_error(error):
-    return jsonify({"msg": Config.ERROR_MESSAGES['401']}), 401
+    return jsonify({"msg": params.ERROR_MESSAGES['401']}), 401
 
-@app.errorhandler(403)
+@app.errorhandler(403) # Forbidden
 def forbidden_error(error):
-    return jsonify({"msg": Config.ERROR_MESSAGES['403']}), 403
+    return jsonify({"msg": params.ERROR_MESSAGES['403']}), 403
 
-@app.errorhandler(404)
+@app.errorhandler(404) # Not Found
 def not_found_error(error):
-    return jsonify({"msg": Config.ERROR_MESSAGES['404']}), 404
+    return jsonify({"msg": params.ERROR_MESSAGES['404']}), 404
 
-@app.errorhandler(429)
+@app.errorhandler(429) # Too Many Requests
 def ratelimit_handler(e):
-    return jsonify({"msg": Config.ERROR_MESSAGES['429']}), 429
+    return jsonify({"msg": params.ERROR_MESSAGES['429']}), 429
 
-@app.errorhandler(500)
+@app.errorhandler(500) # Internal Server Error
 def internal_error(error):
-    return jsonify({"msg": Config.ERROR_MESSAGES['500']}), 500
+    return jsonify({"msg": params.ERROR_MESSAGES['500']}), 500
 
-@app.errorhandler(Exception)
+@app.errorhandler(Exception) # Unhandled Exception
 def unhandled_exception(error):
     app.logger.error('Unhandled Exception: %s', (error))
-    return jsonify({"msg": Config.ERROR_MESSAGES['500']}), 500
-
+    return jsonify({"msg": params.ERROR_MESSAGES['500']}), 500
 
 if __name__ == '__main__':
-    app.run(host=Config.HOST, port=Config.PORT, debug=Config.DEBUG)
+    app.run(host=params.HOST, port=params.PORT, debug=params.DEBUG)

@@ -1,6 +1,7 @@
-from config.Config import Config
 from flask import Blueprint, jsonify, current_app
 from datetime import datetime
+
+from config import params
 
 # Création du blueprint pour les routes de santé
 health_bp = Blueprint('health', __name__, url_prefix="/health")
@@ -11,7 +12,9 @@ def health_check():
     
     return jsonify({
         "status": "healthy",
-        "timestamp": Config.LAST_UPDATE,
-        "service": Config.APP_NAME,
-        "version": Config.APP_VERSION,
+        "timestamp": params.TIMESTAMP(),
+        "service": params.APP_NAME,
+        "version": params.APP_VERSION,
+        "description": params.APP_DESCRIPTION,
+        "launch_time": params.LAST_UPDATE,
     })
