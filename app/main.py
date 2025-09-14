@@ -18,10 +18,12 @@ def create_application():
     # Gestionnaires d'erreurs
     core.register_error_handlers(app)
     
-    # Enregistrement des blueprints
+    # Enregistrement des blueprints core
     app.register_blueprint(core.create_auth_blueprint(redis_client), url_prefix=f"{params.API_PREFIX}/auth")
     app.register_blueprint(core.create_utils_blueprint(redis_client), url_prefix=f"{params.API_PREFIX}/utils")
     app.register_blueprint(core.create_health_blueprint(), url_prefix=f"/health")
+
+    # Enregistrement des blueprints d'application
     app.register_blueprint(blueprints.create_basic_endpoint(), url_prefix=f"{params.API_PREFIX}/basic")
     
     return app

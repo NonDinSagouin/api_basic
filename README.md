@@ -47,7 +47,7 @@ git clone <your-repo-url>
 cd api_basic
 
 # Construire et démarrer l'application
-make build && make start
+make dev-build && make dev-up
 
 # Ou avec Docker Compose directement
 docker-compose -f docker/docker-compose.yml up --build
@@ -57,14 +57,9 @@ docker-compose -f docker/docker-compose.yml up --build
 
 ### Tests de l'API
 ```bash
-# Tester la santé de l'API
-make test-health
 
-# Tester Redis
-make test-redis
-
-# Tester tous les conteneurs
-make test-containers
+# Tester la santé de l'API, Redis et tous les conteneurs
+make tests
 
 # Tester manuellement
 curl http://localhost/health/check
@@ -73,34 +68,46 @@ curl http://localhost/health/check
 ## 📁 Structure du projet
 ```
 api_basic/
+├── .git/                           # Données du repository Git
+├── .gitignore                      # Fichiers ignorés par Git
+├── Makefile                        # Commandes simplifiées Make
+├── README.md                       # Documentation du projet
+├── __pycache__/                    # Cache Python (généré automatiquement)
 ├── app/                            # Code de l'application Flask
 │   ├── main.py                     # Application principale Flask
 │   ├── requirements.txt            # Dépendances Python
+│   ├── __pycache__/                # Cache Python de l'app
 │   ├── blueprints/                 # Modules de l'API (blueprints)
 │   │   ├── __init__.py             # Initialisation des blueprints
-│   │   └── test.py                 # Endpoints de test
+│   │   ├── basic_endpoint.py       # Endpoints de base et test
+│   │   └── __pycache__/            # Cache Python des blueprints
 │   ├── config/                     # Configuration de l'application
 │   │   ├── __init__.py             # Initialisation config
+│   │   ├── .env                    # Variables d'environnement
 │   │   ├── params.py               # Paramètres de configuration
-│   │   └── rateLimit.py            # Configuration limitation de taux
+│   │   ├── rateLimit.py            # Configuration limitation de taux
+│   │   └── __pycache__/            # Cache Python config
 │   └── core/                       # Modules core de l'application
 │       ├── __init__.py             # Initialisation core
 │       ├── auth.py                 # Authentification et autorisation
+│       ├── base.py                 # Factory et configuration Flask
 │       ├── health.py               # Endpoints de santé et monitoring
-│       └── limiter.py              # Gestionnaire de limitation de taux
+│       ├── limiter.py              # Gestionnaire de limitation de taux
+│       ├── register_error_handlers.py # Gestionnaire d'erreurs
+│       ├── setup_jwt.py            # Configuration JWT
+│       ├── utils_blueprint.py      # Utilitaires pour blueprints
+│       └── __pycache__/            # Cache Python core
 ├── docker/                         # Configuration Docker
 │   ├── docker-compose.yml          # Environnement de développement
 │   ├── docker-compose.prod.yml     # Environnement de production
 │   ├── api/                        # Image Docker de l'API
+│   │   ├── .dockerignore           # Fichiers ignorés par Docker
 │   │   └── Dockerfile              # Dockerfile pour l'API
 │   └── nginx/                      # Configuration Nginx
 │       ├── nginx.conf              # Config avec SSL
 │       └── nginx-simple.conf       # Config sans SSL
-├── scripts/                        # Scripts utilitaires
-│   └── setup-ssl.sh                # Configuration SSL automatique
-├── Makefile                        # Commandes simplifiées Make
-├── __pycache__/                    # Cache Python (généré automatiquement)
-└── README.md                       # Documentation du projet
+└── scripts/                        # Scripts utilitaires
+    └── setup-ssl.sh                # Configuration SSL automatique
 ```
 
 ## 📋 Commandes disponibles
@@ -155,32 +162,29 @@ make ssl DOMAIN=exemple.com  # Configure SSL avec Let's Encrypt
 #### 🏥 Santé et monitoring
 - `GET /health/check` - Vérification de santé de l'API avec informations détaillées
   - Retourne : statut, timestamp, nom du service, version, description, temps de lancement
+  - Rate limiting : Aucun
+  - Authentification : Non requise
 
 #### 🔐 Authentification  
-- `POST /api/v1/auth` - Authentification pour obtenir un token JWT
-  - Body JSON requis : `{"username": "admin", "password": "secret"}`
+- `GET /api/v1/auth` - Authentification pour obtenir un token JWT
+  - Body JSON requis : `{"username": "admin", "password": "secret_key"}`
   - Retourne : `{"access_token": "jwt_token"}`
   - Rate limiting : Strict
+  - Authentification : Non requise (endpoint d'authentification)
 
-#### 🧪 Test (Authentification requise)
-- `GET /api/v1/test` - Endpoint de test protégé par JWT
+#### 🧪 Endpoints de base (Authentification requise)
+- `GET /api/v1/basic` - Endpoint de test protégé par JWT
   - Headers requis : `Authorization: Bearer <jwt_token>`
   - Retourne : `{"msg": "Test endpoint"}`
   - Rate limiting : Strict
+  - Authentification : JWT requis
 
-## 📚 Documentation et développement
-
-### Structure de l'API
-L'API est organisée en blueprints pour une meilleure modularité :
-- **health** : Endpoints de monitoring, santé et informations de l'application
-- **users** : Gestion des utilisateurs
-- **auth** : Authentification et autorisation (à venir)
-
-### Limitation de taux
-L'API inclut une limitation de taux configurée via Flask-Limiter pour prévenir les abus.
-
-### CORS
-Support CORS activé pour permettre les requêtes cross-origin depuis les applications frontend.
+#### 🛠️ Utilitaires (Développement)
+- `GET /api/v1/utils/redis-test` - Test de connexion Redis et affichage des variables stockées
+  - Retourne : `{"redis_test": {...}}`
+  - Rate limiting : Aucun
+  - Authentification : Non requise
+  - Usage : Développement et debugging
 
 ## 📝 Auteur
 
