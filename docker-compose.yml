@@ -1,20 +1,21 @@
 services:
   flask-api:
     build:
-      context: ..
-      dockerfile: docker/api/Dockerfile
+      context: .
+      dockerfile: core/api/Dockerfile
     container_name: api_basic-flask-api
     expose:
       - "5000"
     environment:
       - FLASK_ENV=production
       - FLASK_APP=main.py
-      - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env
     volumes:
-      - ../app:/app
+      - ./app:/app
       - redis_data:/redis-data
     restart: unless-stopped
-    command: gunicorn --bind 0.0.0.0:5000 --workers 1 main:app
+    command: gunicorn --bind 0.0.0.0:5000 --workers 4 main:app
     networks:
       - app-network
     depends_on:
@@ -26,7 +27,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx-simple.conf:/etc/nginx/nginx.conf
+      - ./core/nginx/nginx-simple.conf:/etc/nginx/nginx.conf
     depends_on:
       - flask-api
     restart: unless-stopped
@@ -36,14 +37,14 @@ services:
   redis:
     image: redis:7-alpine
     container_name: api_basic-redis
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
     networks:
       - app-network
-    command: redis-server --appendonly yes
+    env_file:
+      - .env
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
 
 volumes:
   redis_data:

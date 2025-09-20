@@ -6,10 +6,12 @@ Ce fichier contient toutes les constantes et paramètres configurables de l'appl
 import os
 import pytz
 
+from urllib.parse import quote
 from datetime import datetime
 from dotenv import load_dotenv
 
-load_dotenv()
+# Chargement du fichier .env depuis la racine du projet
+load_dotenv(dotenv_path='../../.env')
 
 # Informations de l'application
 APP_NAME = os.getenv('APP_NAME', "default_name")
@@ -46,13 +48,20 @@ LOG_DIR = os.getenv('LOG_DIR', '../logs')
 LOG_FILE = f"{LOG_DIR}/{APP_NAME}.log"
 
 # Configuration Rate Limiting
-RATE_LIMIT_STORAGE = os.getenv('RATE_LIMIT_STORAGE', 'memory://')
 DEFAULT_RATE_LIMIT = os.getenv('DEFAULT_RATE_LIMIT', '100 per hour')
 
 # Configuration Redis
 REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
-REDIS_URL = os.getenv('REDIS_URL', f'redis://{REDIS_HOST}:{REDIS_PORT}')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+
+# Construction de l'URL Redis avec gestion sécurisée du mot de passe
+if REDIS_PASSWORD:
+    # Utilisation de urllib.parse.quote pour encoder le mot de passe
+    encoded_password = quote(REDIS_PASSWORD, safe='')
+    REDIS_URL = f"redis://:{encoded_password}@{REDIS_HOST}:{REDIS_PORT}"
+else:
+    raise ValueError("Le mot de passe Redis n'est pas défini dans les variables d'environnement.")
 
 # Métadonnées
 CREATION_DATE = "2025-09-12"

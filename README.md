@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)](https://flask.palletsprojects.com/)
 [![Gunicorn](https://img.shields.io/badge/Gunicorn-21.2.0-yellow.svg)](https://gunicorn.org/)
-[![Redis](https://img.shields.io/badge/Redis-6.4.0-DC382D?logoColor=white)](https://redis.io/)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logoColor=white)](https://redis.io/)
 [![Nginx](https://img.shields.io/badge/Nginx-Proxy-brightgreen.svg)](https://nginx.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
@@ -26,13 +26,13 @@ Une API REST développée avec Flask et déployée avec Docker.
 ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 
 - **Backend** : Python 3.11, Flask 2.3.3
-- **Middleware** : Flask-CORS 4.0.0, Flask-Limiter 3.5.0
-- **Cache/Database** : Redis 7
+- **Sécurité** : JWT Authentication, Rate Limiting, CORS
+- **Cache/Database** : Redis 7 (avec authentification)
 - **Serveur WSGI** : Gunicorn 21.2.0
 - **Proxy inverse** : Nginx
 - **Containerisation** : Docker + Docker Compose
 - **SSL** : Let's Encrypt (optionnel)
-- **Configuration** : Variables d'environnement (.env)
+- **Configuration** : Variables d'environnement (.env centralisé)
 
 ## 🚀 Installation et démarrage
 
@@ -68,10 +68,13 @@ curl http://localhost/health/check
 ## 📁 Structure du projet
 ```
 api_basic/
+├── .env                            # Variables d'environnement centralisées
 ├── .git/                           # Données du repository Git
 ├── .gitignore                      # Fichiers ignorés par Git
 ├── Makefile                        # Commandes simplifiées Make
 ├── README.md                       # Documentation du projet
+├── docker-compose.yml              # Environnement de développement
+├── docker-compose.prod.yml         # Environnement de production
 ├── __pycache__/                    # Cache Python (généré automatiquement)
 ├── app/                            # Code de l'application Flask
 │   ├── main.py                     # Application principale Flask
@@ -83,7 +86,6 @@ api_basic/
 │   │   └── __pycache__/            # Cache Python des blueprints
 │   ├── config/                     # Configuration de l'application
 │   │   ├── __init__.py             # Initialisation config
-│   │   ├── .env                    # Variables d'environnement
 │   │   ├── params.py               # Paramètres de configuration
 │   │   ├── rateLimit.py            # Configuration limitation de taux
 │   │   └── __pycache__/            # Cache Python config
@@ -97,10 +99,8 @@ api_basic/
 │       ├── setup_jwt.py            # Configuration JWT
 │       ├── utils_blueprint.py      # Utilitaires pour blueprints
 │       └── __pycache__/            # Cache Python core
-├── docker/                         # Configuration Docker
-│   ├── docker-compose.yml          # Environnement de développement
-│   ├── docker-compose.prod.yml     # Environnement de production
-│   ├── api/                        # Image Docker de l'API
+├── core/                           # Configuration Docker et infrastructure
+│   ├── docker/                     # Image Docker de l'API
 │   │   ├── .dockerignore           # Fichiers ignorés par Docker
 │   │   └── Dockerfile              # Dockerfile pour l'API
 │   └── nginx/                      # Configuration Nginx
@@ -137,7 +137,7 @@ make logs-nginx    # Affiche les logs de Nginx uniquement
 make status        # Affiche le statut des conteneurs
 ```
 
-### � Tests
+### 🧪 Tests
 ```bash
 make tests            # Exécute tous les tests 
 make test-health      # Teste la santé de l'API
@@ -145,7 +145,7 @@ make test-redis       # Teste la connexion et les opérations Redis
 make test-containers  # Teste le statut de tous les conteneurs
 ```
 
-### �🧹 Maintenance
+### 🧹 Maintenance
 ```bash
 make clean         # Nettoie les conteneurs et images
 make clean-redis   # Nettoie les données Redis
@@ -186,6 +186,6 @@ make ssl DOMAIN=exemple.com  # Configure SSL avec Let's Encrypt
   - Authentification : Non requise
   - Usage : Développement et debugging
 
-## 📝 Auteur
+## � Auteur
 
 *Développé avec ❤️ pour Navion*

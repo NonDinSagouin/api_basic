@@ -40,5 +40,6 @@ def create_redis_client():
     return redis.Redis(
         host=params.REDIS_HOST,
         port=params.REDIS_PORT,
+        password=params.REDIS_PASSWORD,
         db=0
     )
